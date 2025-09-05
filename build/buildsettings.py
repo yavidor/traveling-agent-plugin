@@ -50,7 +50,7 @@ builds = {  # every build entry extends common defaults
 
     # default settings
     'local': {},
-
+    'traveling-agent': {},
     # specify localhost as base for scripts (auto)updating
     # useful for developers
     'dev': {

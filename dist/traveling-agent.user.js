@@ -20,7 +20,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
-plugin_info.buildName = 'local';
+plugin_info.buildName = 'traveling-agent';
 plugin_info.dateTimeVersion = 'None';
 plugin_info.pluginId = 'traveling-agent';
 //END PLUGIN AUTHORS NOTE
