@@ -47,9 +47,10 @@ var changelog = [
 ];
 
 // use own namespace for plugin
-const pluginName = 'travelingAgent';
-const playerLocationKey = 'traveling-agent-player-location';
 window.plugin.travelingAgent = {};
+window.plugin.travelingAgent.pluginName = 'travelingAgent';
+window.plugin.travelingAgent.playerLocationKey = 'traveling-agent-player-location';
+window.plugin.travelingAgent.RouteStepsKey = 'traveling-agent-route-steps';
 
 window.plugin.travelingAgent.createLayer = function () {
   window.plugin.travelingAgent.routeLayer = new L.LayerGroup();
@@ -75,14 +76,14 @@ window.plugin.travelingAgent.setLocation = function () {
     draggable: true,
     title: 'Drag to change current location',
   });
-  localStorage[playerLocationKey] = JSON.stringify({
+  localStorage[window.plugin.travelingAgent.playerLocationKey] = JSON.stringify({
     lat: window.plugin.travelingAgent.playerLocation.lat,
     lng: window.plugin.travelingAgent.playerLocation.lng,
   });
 
   window.plugin.travelingAgent.locationMarker.on('drag', function () {
     window.plugin.travelingAgent.playerLocation = L.latLng(window.plugin.travelingAgent.locationMarker.getLatLng());
-    localStorage[playerLocationKey] = JSON.stringify({
+    localStorage[window.plugin.travelingAgent.playerLocationKey] = JSON.stringify({
       lat: window.plugin.travelingAgent.playerLocation.lat,
       lng: window.plugin.travelingAgent.playerLocation.lng,
     });
@@ -103,6 +104,7 @@ function drawLayer(steps) {
   window.plugin.travelingAgent.routePolyline = L.geodesicPolyline(steps, {
     name: 'routePolyline',
     ...window.plugin.drawTools.lineOptions,
+    color: '#FF0000',
   });
   window.plugin.travelingAgent.routeLayer.addLayer(window.plugin.travelingAgent.routePolyline);
   window.plugin.travelingAgent.routeLayer.addLayer(window.plugin.travelingAgent.locationMarker);
@@ -135,15 +137,13 @@ async function getBestRoute(nodes) {
     avoidHighways: false,
     avoidTolls: false,
   };
-  window.plugin.drawTools.setDrawColor('#FF0000');
   const results = await service.route(request);
-  console.log(results);
   const routeLayer = results.routes[0].overview_path.map((x) => L.latLng(x.lat(), x.lng()));
   if (window.plugin.travelingAgent.routePolyline !== undefined && window.plugin.travelingAgent.routePolyline !== null) {
     window.plugin.travelingAgent.routeLayer.removeLayer(window.plugin.travelingAgent.routePolyline);
   }
   drawLayer(routeLayer);
-  window.plugin.drawTools.setDrawColor('#a24ac3');
+  localStorage[window.plugin.travelingAgent.RouteStepsKey] = JSON.stringify(routeLayer);
   /**
    * @type {Portal[]}
    */
@@ -159,7 +159,6 @@ window.plugin.travelingAgent.draw = function () {
     return;
   }
   $('#bookmarkInDrawer a.bookmarkLabel.selected').each(async function (_, element) {
-    console.log(element.innerText);
     const bookmarkContent = getBookmarkById($(element).data('id')).bkmrk;
     /**
      * @type {Portal[]}
@@ -255,17 +254,17 @@ window.plugin.travelingAgent.setupCSS = function () {
 
 function setup() {
   if (window.plugin.bookmarks === undefined) {
-    alert(`'${pluginName}' requires 'bookmarks'`);
+    alert(`'${window.plugin.travelingAgent.pluginName}' requires 'bookmarks'`);
     return;
   }
 
   if (window.plugin.drawTools === undefined) {
-    alert(`'${pluginName}' requires 'drawTools'`);
+    alert(`'${window.plugin.travelingAgent.pluginName}' requires 'drawTools'`);
     return;
   }
   window.plugin.travelingAgent.createLayer();
   try {
-    window.plugin.travelingAgent.playerLocation = L.latLng(JSON.parse(localStorage[playerLocationKey]));
+    window.plugin.travelingAgent.playerLocation = L.latLng(JSON.parse(localStorage[window.plugin.travelingAgent.playerLocationKey]));
     window.plugin.travelingAgent.locationMarker = L.marker(window.plugin.travelingAgent.playerLocation, {
       icon: L.divIcon.coloredSvg('#4FA3AB'),
       draggable: true,
@@ -274,12 +273,12 @@ function setup() {
     window.plugin.travelingAgent.routeLayer.addLayer(window.plugin.travelingAgent.locationMarker);
     window.plugin.travelingAgent.locationMarker.on('drag', function () {
       window.plugin.travelingAgent.playerLocation = L.latLng(window.plugin.travelingAgent.locationMarker.getLatLng());
-      localStorage[playerLocationKey] = JSON.stringify({
+      localStorage[window.plugin.travelingAgent.playerLocationKey] = JSON.stringify({
         lat: window.plugin.travelingAgent.playerLocation.lat,
         lng: window.plugin.travelingAgent.playerLocation.lng,
       });
     });
-    console.log(window.plugin.travelingAgent.playerLocation);
+    drawLayer(JSON.parse(localStorage[window.plugin.travelingAgent.RouteStepsKey] || '{}'));
   } catch (e) {
     console.error(e);
     window.plugin.travelingAgent.playerLocation = null;
