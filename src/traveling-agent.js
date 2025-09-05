@@ -3,6 +3,9 @@
 // @category       Misc
 // @version        0.0.2
 // @description    Calculates the best route between the player's location and a series of portals
+// @depends        draw-tools@breunigs|bookmarks@ZasoGD
+// @updateURL      https://github.com/yavidor/traveling-agent-plugin/raw/refs/heads/main/dist/traveling-agent.user.js
+// @downloadURL    https://github.com/yavidor/traveling-agent-plugin/raw/refs/heads/main/dist/traveling-agent.user.js
 
 /* exported setup, changelog --eslint */
 
